@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>САЙТ БАРЫГИ - Учет торговых операций</title>
+    <meta name="description" content="Простое приложение для учета покупок, продаж и расчета прибыли. Ведите учет своих торговых операций легко и удобно.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .tab-active {
+            @apply bg-blue-500 text-white;
+        }
+        .profit-positive {
+            @apply text-green-600 font-semibold;
+        }
+        .profit-negative {
+            @apply text-red-600 font-semibold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="chart-line" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">САЙТ БАРЫГИ</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm">
+                        <span class="text-gray-600">Общая прибыль:</span>
+                        <span id="total-profit" class="font-semibold ml-2">₽0</span>
+                    </div>
+                    <button onclick="clearAllData()" class="text-sm text-red-600 hover:text-red-800">
+                        Очистить все данные
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i data-lucide="shopping-cart" class="w-8 h-8 text-red-500"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Потрачено</p>
+                        <p id="total-bought" class="text-2xl font-bold text-red-600">₽0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i data-lucide="dollar-sign" class="w-8 h-8 text-green-500"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Выручено</p>
+                        <p id="total-sold" class="text-2xl font-bold text-green-600">₽0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i data-lucide="package" class="w-8 h-8 text-blue-500"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Имущество</p>
+                        <p id="total-assets" class="text-2xl font-bold text-blue-600">₽0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i data-lucide="trending-up" class="w-8 h-8 text-purple-500"></i>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Прибыль</p>
+                        <p id="profit-card" class="text-2xl font-bold">₽0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6">
+                    <button onclick="setActiveTab('bought')" id="tab-bought" class="py-4 px-1 border-b-2 font-medium text-sm tab-active">
+                        Купил
+                    </button>
+                    <button onclick="setActiveTab('sold')" id="tab-sold" class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
+                        Продал
+                    </button>
+                    <button onclick="setActiveTab('assets')" id="tab-assets" class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
+                        Имущество
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- Bought Tab -->
+                <div id="content-bought" class="tab-content">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Добавить покупку</h3>
+                        <form id="bought-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="bought-name" placeholder="Название товара" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="bought-price" placeholder="Цена за единицу" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="bought-quantity" placeholder="Количество" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                Добавить покупку
+                            </button>
+                        </form>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">История покупок</h3>
+                        <div id="bought-table" class="overflow-x-auto">
+                            <table class="min-w-full table-auto">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Название</th>
+                                        <th class="px-4 py-2 text-left">Цена</th>
+                                        <th class="px-4 py-2 text-left">Количество</th>
+                                        <th class="px-4 py-2 text-left">Сумма</th>
+                                        <th class="px-4 py-2 text-left">Дата</th>
+                                        <th class="px-4 py-2 text-left">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bought-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sold Tab -->
+                <div id="content-sold" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Добавить продажу</h3>
+                        <form id="sold-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="sold-name" placeholder="Название товара" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="sold-price" placeholder="Цена за единицу" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="sold-quantity" placeholder="Количество" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                Добавить продажу
+                            </button>
+                        </form>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">История продаж</h3>
+                        <div id="sold-table" class="overflow-x-auto">
+                            <table class="min-w-full table-auto">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Название</th>
+                                        <th class="px-4 py-2 text-left">Цена</th>
+                                        <th class="px-4 py-2 text-left">Количество</th>
+                                        <th class="px-4 py-2 text-left">Сумма</th>
+                                        <th class="px-4 py-2 text-left">Дата</th>
+                                        <th class="px-4 py-2 text-left">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sold-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assets Tab -->
+                <div id="content-assets" class="tab-content hidden">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Добавить имущество</h3>
+                        <form id="assets-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="assets-name" placeholder="Название" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="assets-price" placeholder="Цена за единицу" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <input type="number" id="assets-quantity" placeholder="Количество" step="0.01" class="border border-gray-300 rounded-lg px-3 py-2" required>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                Добавить имущество
+                            </button>
+                        </form>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Список имущества</h3>
+                        <div id="assets-table" class="overflow-x-auto">
+                            <table class="min-w-full table-auto">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Название</th>
+                                        <th class="px-4 py-2 text-left">Цена</th>
+                                        <th class="px-4 py-2 text-left">Количество</th>
+                                        <th class="px-4 py-2 text-left">Сумма</th>
+                                        <th class="px-4 py-2 text-left">Дата</th>
+                                        <th class="px-4 py-2 text-left">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assets-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
